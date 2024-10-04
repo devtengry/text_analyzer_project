@@ -1,0 +1,8 @@
+Total Characters: 15
+Total Words: 1
+Total Sentences: 0
+Total Paragraphs: 1
+Total Punctuation Marks: 0
+Total Digits: 0
+Letter Frequency: {'a': 5, 's': 2, 'd': 4, 'w': 4}
+Word Frequency: {'asdasdawdawwawd': 1}

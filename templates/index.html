@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Metin Analiz Aracı</h1>
+        <form id="text-form">
+            <textarea name="text" rows="10" cols="50" placeholder="Metni buraya giriniz..."></textarea>
+            <br>
+            <button type="submit">Analiz Et</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('text-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
+                    for (let key in data) {
+                        resultHtml += `<li>${key}: ${data[key]}</li>`;
+                    }
+                    resultHtml += '</ul>';
+                    document.getElementById('result').innerHTML = resultHtml;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
