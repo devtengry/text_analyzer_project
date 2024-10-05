@@ -1,23 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Analyzer</title>
+    <title>Metin Analiz Aracı</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>Metin Analiz Aracı</h1>
+
+        <!-- Metin Analiz Formu -->
         <form id="text-form">
             <textarea name="text" rows="10" cols="50" placeholder="Metni buraya giriniz..."></textarea>
             <br>
             <button type="submit">Analiz Et</button>
         </form>
+
         <div id="result"></div>
+
+        <!-- Arama formlarını kapsayan bir div -->
+        <div class="search-container">
+            <!-- Harf Frekansı Arama Formu -->
+            <div class="search-box">
+                <h2>Harf Frekansı Arama</h2>
+                <form id="letter-form">
+                    <input type="text" name="letter" maxlength="1" placeholder="Bir harf giriniz...">
+                    <br>
+                    <button type="submit">Harf Ara</button>
+                </form>
+                <div id="letter-result"></div>
+            </div>
+
+            <!-- Kelime Frekansı Arama Formu -->
+            <div class="search-box">
+                <h2>Kelime Frekansı Arama</h2>
+                <form id="word-form">
+                    <input type="text" name="word" placeholder="Bir kelime giriniz...">
+                    <br>
+                    <button type="submit">Kelime Ara</button>
+                </form>
+                <div id="word-result"></div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Metin analiz işlemi
         document.getElementById('text-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -29,16 +58,48 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    document.getElementById('result').innerHTML = `<p style="color: red;">${data.error}</p>`;
-                } else {
-                    let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
-                    for (let key in data) {
-                        resultHtml += `<li>${key}: ${data[key]}</li>`;
-                    }
-                    resultHtml += '</ul>';
-                    document.getElementById('result').innerHTML = resultHtml;
+                let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
+                for (let key in data) {
+                    resultHtml += `<li>${key}: ${data[key]}</li>`;
                 }
+                resultHtml += '</ul>';
+                document.getElementById('result').innerHTML = resultHtml;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Harf frekansı arama işlemi
+        document.getElementById('letter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch('/search_letter', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let searchResultHtml = `<p>Harf Frekansı: ${data['Harf Frekansı']}</p>`;
+                document.getElementById('letter-result').innerHTML = searchResultHtml;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Kelime frekansı arama işlemi
+        document.getElementById('word-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch('/search_word', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let searchResultHtml = `<p>Kelime Frekansı: ${data['Kelime Frekansı']}</p>`;
+                document.getElementById('word-result').innerHTML = searchResultHtml;
             })
             .catch(error => console.error('Error:', error));
         });

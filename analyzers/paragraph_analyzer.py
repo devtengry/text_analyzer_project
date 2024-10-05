@@ -1,2 +1,3 @@
 def count_paragraphs(text):
-    return text.count('\n\n') + 1
+    paragraphs = [p for p in text.split('\n') if p.strip() != '']
+    return len(paragraphs)
