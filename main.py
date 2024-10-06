@@ -62,7 +62,7 @@ def arama_kelime():
     kelime = request.form['word']
     result = word_freq.get(kelime, "Kelime bulunamadı")
 
-    return jsonify({"Kelime Frekansı": result})
+    return jsonify({"Kelime Sıklığı": result})
 
 if __name__ == "__main__":
     app.run(debug=True)
