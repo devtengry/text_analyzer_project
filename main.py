@@ -52,7 +52,7 @@ def arama_harf():
     harf = request.form['letter']
     result = letter_freq.get(harf, "Harf bulunamadı")
 
-    return jsonify({"Harf Frekansı": result})
+    return jsonify({"Harf Sıklığı": result})
 
 # Kelime frekansı arama işlemi
 @app.route('/search_word', methods=['POST'])
