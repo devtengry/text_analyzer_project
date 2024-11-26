@@ -19,7 +19,7 @@ word_freq = {}
 def anasayfa():
     return render_template('index.html')
 
-# Metni analiz etme işlemi
+# Metni analiz etme işlemisss
 @app.route('/analyze', methods=['POST'])
 def analiz():
     global letter_freq, word_freq
