@@ -16,17 +16,23 @@
             <textarea name="text" rows="10" cols="50" placeholder="Metni buraya giriniz..."></textarea>
             <br>
             <button type="submit">Analiz Et</button>
+            <button type="button" id="draw-image-btn">Görsel Oluştur</button>
         </form>
 
-        <!-- Harf Sayısı -->
-        <div id="letter-count" style="font-size: 20px; margin-top: 20px;"></div>
-
-        <div id="visualization">
-            <h3>Analiz Sonuçları Grafikleri</h3>
-            <canvas id="analysis-chart" width="400" height="200"></canvas>
+        <!-- Toplam harf sayısı ve grafik -->
+        <div id="result-container" style="margin-top: 20px;">
+            <h3 id="total-characters">Toplam Harf Sayısı: -</h3>
+            <div id="visualization" style="margin-top: 20px;">
+                <canvas id="analysis-chart" width="400" height="200"></canvas>
+            </div>
         </div>
 
-        <!-- Arama formları -->
+        <!-- Çizilen Görsel -->
+        <div id="image-container" style="text-align: center; margin-top: 20px;">
+            <img id="generated-image" style="display: none; max-width: 100%; height: auto;" alt="Oluşturulan görsel">
+        </div>
+
+        <!-- Harf ve Kelime Arama -->
         <div class="search-container">
             <div class="search-box">
                 <h2>Harf Frekansı Arama</h2>
@@ -66,30 +72,43 @@
                 if (data.hata) {
                     alert(data.hata);
                 } else {
-                    // Harf sayısını ekliyoruz
-                    const letterCount = data["Toplam Karakter Sayısı"] || 0;
-                    document.getElementById('letter-count').innerHTML = `<strong>Harf Sayısı: </strong>${letterCount}`;
+                    // Toplam karakter sayısını göster
+                    document.getElementById('total-characters').textContent = `Toplam Harf Sayısı: ${data["Toplam Karakter Sayısı"]}`;
 
-                    // Grafik oluşturma
+                    // Grafik oluşturma (Karakter sayısını dahil etme)
+                    const chartData = {
+                        labels: ["Kelimeler", "Cümleler", "Paragraflar", "Noktalama İşaretleri", "Rakamlar"],
+                        datasets: [{
+                            label: 'Analiz Sonuçları',
+                            data: [
+                                data["Toplam Kelime Sayısı"],
+                                data["Toplam Cümle Sayısı"],
+                                data["Toplam Paragraf Sayısı"],
+                                data["Toplam Noktalama İşareti Sayısı"],
+                                data["Toplam Rakam Sayısı"]
+                            ],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 99, 132, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    };
+
                     const ctx = document.getElementById('analysis-chart').getContext('2d');
-                    const filteredData = { ...data };
-
-                    // Harf frekansını ve toplam karakter sayısını grafikten çıkarmak için
-                    delete filteredData["Harf Sıklığı"];  // 'Harf Sıklığı' key'ini çıkarıyoruz
-                    delete filteredData["Toplam Karakter Sayısı"];  // 'Toplam Karakter Sayısı' key'ini çıkarıyoruz
-
                     new Chart(ctx, {
                         type: 'bar',
-                        data: {
-                            labels: Object.keys(filteredData),  // Harf dışındaki tüm veriler
-                            datasets: [{
-                                label: 'Analiz Sonuçları',
-                                data: Object.values(filteredData),  // Harf dışındaki tüm veriler
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 1
-                            }]
-                        },
+                        data: chartData,
                         options: {
                             scales: {
                                 y: {
@@ -99,6 +118,23 @@
                         }
                     });
                 }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Görsel oluşturma işlemi
+        document.getElementById('draw-image-btn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('text-form'));
+
+            fetch('/draw_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(imageBlob => {
+                const imgElement = document.getElementById('generated-image');
+                imgElement.src = URL.createObjectURL(imageBlob);
+                imgElement.style.display = 'block';
             })
             .catch(error => console.error('Error:', error));
         });

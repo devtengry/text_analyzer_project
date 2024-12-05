@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify
+import io
+from flask import Flask, render_template, request, jsonify, send_file
 from analyzers.character_analyzer import count_characters
 from analyzers.word_analyzer import count_words
 from analyzers.sentence_analyzer import count_sentences
@@ -7,6 +8,7 @@ from analyzers.punctuation_analyzer import count_punctuation
 from analyzers.digit_analyzer import count_digits
 from analyzers.letter_analyzer import letter_frequency
 from analyzers.word_frequency_analyzer import word_frequency
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 
@@ -63,6 +65,42 @@ def arama_kelime():
     result = word_freq.get(kelime, "Kelime bulunamadı")
 
     return jsonify({"Kelime Sıklığı": result})
+
+# Görsel oluşturma işlemi
+@app.route('/draw_image', methods=['POST'])
+def draw_image():
+    metin = request.form['text']
+
+    if not metin:
+        return jsonify({"hata": "Metin boş olamaz!"}), 400
+
+    # Analiz verilerini al
+    analiz_sonuclari = {
+        "Kelime Sayısı": count_words(metin),
+        "Cümle S.": count_sentences(metin),
+        "Paragraf S.": count_paragraphs(metin),
+        "Noktalama İşareti S.": count_punctuation(metin),
+        "Rakam S.": count_digits(metin)
+    }
+
+    # Grafik çizimi
+    labels = list(analiz_sonuclari.keys())
+    values = list(analiz_sonuclari.values())
+
+    plt.figure(figsize=(8, 6))
+    plt.bar(labels, values, color=['skyblue', 'orange', 'green', 'purple', 'red'])
+    plt.title('Metin Analiz Sonuçları')
+    plt.xlabel('Özellikler')
+    plt.ylabel('Değerler')
+    plt.tight_layout()
+
+    # Görseli belleğe kaydet
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    return send_file(img, mimetype='image/png')
 
 if __name__ == "__main__":
     app.run(debug=True)
