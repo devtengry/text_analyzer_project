@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metin Analiz Aracı</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -17,11 +18,16 @@
             <button type="submit">Analiz Et</button>
         </form>
 
-        <div id="result"></div>
+        <!-- Harf Sayısı -->
+        <div id="letter-count" style="font-size: 20px; margin-top: 20px;"></div>
 
-        <!-- Arama formlarını kapsayan bir div -->
+        <div id="visualization">
+            <h3>Analiz Sonuçları Grafikleri</h3>
+            <canvas id="analysis-chart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Arama formları -->
         <div class="search-container">
-            <!-- Harf Frekansı Arama Formu -->
             <div class="search-box">
                 <h2>Harf Frekansı Arama</h2>
                 <form id="letter-form">
@@ -32,7 +38,6 @@
                 <div id="letter-result"></div>
             </div>
 
-            <!-- Kelime Frekansı Arama Formu -->
             <div class="search-box">
                 <h2>Kelime Frekansı Arama</h2>
                 <form id="word-form">
@@ -61,12 +66,38 @@
                 if (data.hata) {
                     alert(data.hata);
                 } else {
-                    let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
-                    for (let key in data) {
-                        resultHtml += `<li>${key}: ${data[key]}</li>`;
-                    }
-                    resultHtml += '</ul>';
-                    document.getElementById('result').innerHTML = resultHtml;
+                    // Harf sayısını ekliyoruz
+                    const letterCount = data["Toplam Karakter Sayısı"] || 0;
+                    document.getElementById('letter-count').innerHTML = `<strong>Harf Sayısı: </strong>${letterCount}`;
+
+                    // Grafik oluşturma
+                    const ctx = document.getElementById('analysis-chart').getContext('2d');
+                    const filteredData = { ...data };
+
+                    // Harf frekansını ve toplam karakter sayısını grafikten çıkarmak için
+                    delete filteredData["Harf Sıklığı"];  // 'Harf Sıklığı' key'ini çıkarıyoruz
+                    delete filteredData["Toplam Karakter Sayısı"];  // 'Toplam Karakter Sayısı' key'ini çıkarıyoruz
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: Object.keys(filteredData),  // Harf dışındaki tüm veriler
+                            datasets: [{
+                                label: 'Analiz Sonuçları',
+                                data: Object.values(filteredData),  // Harf dışındaki tüm veriler
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -84,7 +115,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('letter-result').innerHTML = `<p>Harf Frekansı: ${data['Harf Frekansı']}</p>`;
+                let searchResultHtml = `<p>Harf Frekansı: ${data['Harf Sıklığı']}</p>`;
+                document.getElementById('letter-result').innerHTML = searchResultHtml;
             })
             .catch(error => console.error('Error:', error));
         });
@@ -101,7 +133,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('word-result').innerHTML = `<p>Kelime Frekansı: ${data['Kelime Frekansı']}</p>`;
+                let searchResultHtml = `<p>Kelime Frekansı: ${data['Kelime Sıklığı']}</p>`;
+                document.getElementById('word-result').innerHTML = searchResultHtml;
             })
             .catch(error => console.error('Error:', error));
         });
