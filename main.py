@@ -19,14 +19,15 @@ word_freq = {}
 def anasayfa():
     return render_template('index.html')
 
-# Metni analiz etme işlemisss
+# Metni analiz etme işlemi
 @app.route('/analyze', methods=['POST'])
 def analiz():
     global letter_freq, word_freq
 
-    metin = request.form['text']
+    metin = request.form.get('text', '')
+    print(f"Gelen metin: {metin}")  # Loglama
 
-    if not metin:
+    if not metin.strip():
         return jsonify({"hata": "Metin boş olamaz!"}), 400
 
     # Harf ve kelime frekanslarını global değişkenlere kaydet
@@ -42,6 +43,7 @@ def analiz():
         "Toplam Rakam Sayısı": count_digits(metin)
     }
 
+    print(f"Analiz Sonuçları: {analiz_sonuclari}")  # Loglama
     return jsonify(analiz_sonuclari)
 
 # Harf frekansı arama işlemi
@@ -49,20 +51,28 @@ def analiz():
 def arama_harf():
     global letter_freq
 
-    harf = request.form['letter']
-    result = letter_freq.get(harf, "Harf bulunamadı")
+    harf = request.form.get('letter', '').lower()
+    print(f"Aranan harf: {harf}")  # Loglama
 
-    return jsonify({"Harf Sıklığı": result})
+    if not harf or len(harf) != 1 or not harf.isalpha():
+        return jsonify({"Harf Frekansı": "Geçerli bir harf giriniz!"})
+
+    result = letter_freq.get(harf, 0)
+    return jsonify({"Harf Frekansı": result})
 
 # Kelime frekansı arama işlemi
 @app.route('/search_word', methods=['POST'])
 def arama_kelime():
     global word_freq
 
-    kelime = request.form['word']
-    result = word_freq.get(kelime, "Kelime bulunamadı")
+    kelime = request.form.get('word', '')
+    print(f"Aranan kelime: {kelime}")  # Loglama
 
-    return jsonify({"Kelime Sıklığı": result})
+    if not kelime.strip():
+        return jsonify({"Kelime Frekansı": "Geçerli bir kelime giriniz!"})
+
+    result = word_freq.get(kelime, 0)
+    return jsonify({"Kelime Frekansı": result})
 
 if __name__ == "__main__":
     app.run(debug=True)

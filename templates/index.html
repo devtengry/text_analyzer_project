@@ -58,12 +58,16 @@
             })
             .then(response => response.json())
             .then(data => {
-                let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
-                for (let key in data) {
-                    resultHtml += `<li>${key}: ${data[key]}</li>`;
+                if (data.hata) {
+                    alert(data.hata);
+                } else {
+                    let resultHtml = '<h3>Analiz Sonuçları:</h3><ul>';
+                    for (let key in data) {
+                        resultHtml += `<li>${key}: ${data[key]}</li>`;
+                    }
+                    resultHtml += '</ul>';
+                    document.getElementById('result').innerHTML = resultHtml;
                 }
-                resultHtml += '</ul>';
-                document.getElementById('result').innerHTML = resultHtml;
             })
             .catch(error => console.error('Error:', error));
         });
@@ -80,8 +84,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                let searchResultHtml = `<p>Harf Frekansı: ${data['Harf Frekansı']}</p>`;
-                document.getElementById('letter-result').innerHTML = searchResultHtml;
+                document.getElementById('letter-result').innerHTML = `<p>Harf Frekansı: ${data['Harf Frekansı']}</p>`;
             })
             .catch(error => console.error('Error:', error));
         });
@@ -98,8 +101,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                let searchResultHtml = `<p>Kelime Frekansı: ${data['Kelime Frekansı']}</p>`;
-                document.getElementById('word-result').innerHTML = searchResultHtml;
+                document.getElementById('word-result').innerHTML = `<p>Kelime Frekansı: ${data['Kelime Frekansı']}</p>`;
             })
             .catch(error => console.error('Error:', error));
         });
